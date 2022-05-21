@@ -3,14 +3,17 @@ from os import getenv
 from app.controllers.horoscope_controller import get_zodiacal_sign, get_chinese_sign, parse_zodiacal_forecast, \
     parse_chinese_forecast
 
+from datetime import datetime
+
 # Для отладки
 from dotenv import load_dotenv
 load_dotenv()
 
-
+# Необходимые переменные
 REDIS_HOST = getenv('HOST')
 REDIS_PASSWORD = getenv('REDIS_PASSWORD')
 
+# Создание подключения к Redis
 redis_con = redis.Redis(
     host=REDIS_HOST,
     port=6379,
@@ -18,45 +21,117 @@ redis_con = redis.Redis(
 )
 
 
+def get_last_update_time():
+    """
+    Функция для получения из Redis последнего времени обновления гороскопов
+    :return: None | datetime.datetine
+    """
+    key = 'forecast'
+    data = redis_con.hget(key, 'update_time')
+    if data:
+        date = datetime.strptime(data.decode(), '%d.%m.%Y %H:%M')
+        return date
+    return None
+
+
+def set_last_update_time():
+    """
+    Функция для установки последнего времени обновления гороскопов
+    :return:
+    """
+    key = 'forecast'
+    current_datetime = datetime.utcnow()
+    data = current_datetime.strftime('%d.%m.%Y %H:%M')
+    redis_con.hset(key, 'update_time', data)
+
+
 def add_user_zodiacal_sign(user_id, date):
+    """
+    Функция для сохранения знака зодиака пользтвателя
+    :param user_id: id пользователя в Telegram
+    :param date: дата рождения пользователя
+    :return:
+    """
     sign = get_zodiacal_sign(date)
     key = 'user:{}'.format(user_id)
     redis_con.hset(key, 'zodiacal', sign)
 
 
 def add_user_chinese_sign(user_id, date):
+    """
+    Функция для сохранения китайского знака пользователя
+    :param user_id: id пользователя в Telegram
+    :param date: дата рождения пользователя
+    :return:
+    """
     sign = get_chinese_sign(date)
     key = 'user:{}'.format(user_id)
     redis_con.hset(key, 'chinese', sign)
 
 
 def get_user_zodiacal_sign(user_id):
+    """
+    Функция для получения знака зодиака пользователя
+    :param user_id: id пользователя в Telegram
+    :return: None | str
+    """
     key = 'user:{}'.format(user_id)
     sign = redis_con.hget(key, 'zodiacal')
     if sign:
-        return sign
+        return sign.decode()
 
 
 def get_user_chinese_sign(user_id):
+    """
+    Функция для получения китайского знака пользователя
+    :param user_id: id пользователя в Telegram
+    :return: None | str
+    """
     key = 'user:{}'.format(user_id)
     sign = redis_con.hget(key, 'chinese')
     if sign:
-        return sign
+        return sign.decode()
 
 
 def update_zodiacal_forecast():
+    """
+    Функция для обновления знаков зодиака
+    :return:
+    """
     key = 'forecast:zodiacal'
     for sign, forecast in parse_zodiacal_forecast():
         redis_con.hset(key, sign, forecast)
 
 
 def update_chinese_forecast():
+    """
+    Функция для обновления китайских знаков
+    :return:
+    """
     key = 'forecast:chinese'
     for sign, forecast in parse_chinese_forecast():
         redis_con.hset(key, sign, forecast)
 
 
+def update_forecasts():
+    """
+    Метод для обновления всех гороскопов, если прошло более 20 часов с последнего обновления
+    :return:
+    """
+    current_time = datetime.utcnow()
+    last_update_time = get_last_update_time()
+    if not last_update_time or (current_time - last_update_time).seconds // 3600 >= 20:
+        update_zodiacal_forecast()
+        update_chinese_forecast()
+        set_last_update_time()
+
+
 def get_zodiacal_forecast(sign):
+    """
+    Получить прогноз для знака зодиака
+    :param sign: знак зодиака
+    :return: None | str
+    """
     key = 'forecast:zodiacal'
     forecast = redis_con.hget(key, sign)
     if forecast:
@@ -64,6 +139,11 @@ def get_zodiacal_forecast(sign):
 
 
 def get_chinese_forecast(sign):
+    """
+    Получить прогноз для китайского знака
+    :param sign: знак
+    :return: None | str
+    """
     key = 'forecast:chinese'
     forecast = redis_con.hget(key, sign)
     if forecast:

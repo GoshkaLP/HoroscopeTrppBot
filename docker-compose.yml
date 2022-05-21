@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+
+  trpp_redis:
+    image: redis:alpine
+    container_name: trpp_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./redis_data:/data
+    networks:
+      - trpp
+
+  trpp_bot:
+    build: .
+    container_name: trpp_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "8025"
+    depends_on:
+      - trpp_redis
+    networks:
+      - trpp
+
+networks:
+  trpp:
