@@ -1,15 +1,15 @@
 from flask_apscheduler import APScheduler
-from datetime import timezone
+from pytz import utc
 from app.controllers.redis_controller import update_forecasts
 
 # Создание объекта планировщика
 scheduler = APScheduler()
 
 
-@scheduler.task('cron', id='update_horoscopes', hour=22, timezone=timezone.utc)
+@scheduler.task('interval', id='update_horoscopes', hours=1, timezone=utc)
 def job_update_horoscopes():
     """
-    Функция для создания cron-job, которая будет обновлять гороскопы каждые сутки
+    Функция для создания interval-job, которая будет проверять обновления гороскопа каждый час
     :return:
     """
     update_forecasts()

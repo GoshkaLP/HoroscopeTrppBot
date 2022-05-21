@@ -8,8 +8,8 @@ from app.controllers.redis_controller import get_zodiacal_forecast, get_chinese_
 from datetime import datetime
 
 # Для отладки
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Необходимые переменные
 TOKEN = getenv('TG_TOKEN')
@@ -62,7 +62,7 @@ def start_handler(message):
     :param message: входящее сообщение
     :return:
     """
-    mes = ' Привет! Данный бот поможет узнать зодиакальный и китайский гороскоп на каждый день! ' \
+    mes = 'Привет! Данный бот поможет узнать зодиакальный и китайский гороскоп на каждый день! ' \
           'Отправьте команду `/forecast`, чтобы начать!'
     bot.reply_to(message, mes, parse_mode='Markdown')
 

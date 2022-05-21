@@ -1,30 +1,33 @@
 import redis
-from os import getenv
+from os import getenv, name
 from app.controllers.horoscope_controller import get_zodiacal_sign, get_chinese_sign, parse_zodiacal_forecast, \
     parse_chinese_forecast
 
 from datetime import datetime
 
 # Для отладки
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # Необходимые переменные
-REDIS_HOST = getenv('HOST')
+REDIS_HOST = getenv('REDIS_HOST')
+if name == 'posix':
+    REDIS_HOST = 'trpp_redis'
 REDIS_PASSWORD = getenv('REDIS_PASSWORD')
 
 # Создание подключения к Redis
 redis_con = redis.Redis(
     host=REDIS_HOST,
     port=6379,
-    db=0
+    db=0,
+    password=REDIS_PASSWORD
 )
 
 
 def get_last_update_time():
     """
     Функция для получения из Redis последнего времени обновления гороскопов
-    :return: None | datetime.datetine
+    :return: None | datetime.datetime
     """
     key = 'forecast'
     data = redis_con.hget(key, 'update_time')
