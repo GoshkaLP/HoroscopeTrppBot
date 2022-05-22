@@ -113,7 +113,7 @@ def get_user_sign(message):
     if zodiacal_sign and chinese_sign:
         zodiacal_sign_text = list(zodiacal.keys())[list(zodiacal.values()).index(zodiacal_sign)]
         chinese_sign_text = list(chinese.keys())[list(chinese.values()).index(chinese_sign)]
-        bot.reply_to(message, 'Ваш *знак зодикака*: {}\n'
+        bot.reply_to(message, 'Ваш *знак зодиака*: {}\n'
                               'Ваш *китайский знак*: {}'.format(zodiacal_sign_text, chinese_sign_text),
                      parse_mode='Markdown')
     else:
@@ -149,7 +149,7 @@ def forecast_choice(message):
             markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, selective=True)
             user_zodiacal_sign = get_user_zodiacal_sign(user_id)
             if user_zodiacal_sign:
-                user_zodiacal_sign_text = 'Ваш: {}'.format(
+                user_zodiacal_sign_text = 'Ваш зодиакальный знак: {}'.format(
                     list(zodiacal.keys())[list(zodiacal.values()).index(user_zodiacal_sign)]
                 )
                 markup.row(user_zodiacal_sign_text)
@@ -161,7 +161,7 @@ def forecast_choice(message):
             markup = types.ReplyKeyboardMarkup(one_time_keyboard=True, selective=True)
             user_chinese_sign = get_user_chinese_sign(user_id)
             if user_chinese_sign:
-                user_chinese_sign_text = 'Ваш: {}'.format(
+                user_chinese_sign_text = 'Ваш китайский знак: {}'.format(
                     list(chinese.keys())[list(chinese.values()).index(user_chinese_sign)]
                 )
                 markup.row(user_chinese_sign_text)
@@ -175,7 +175,7 @@ def forecast_choice(message):
         bot.reply_to(message, 'Произошла ошибка! Попробуйте еще раз!')
 
 
-@bot.message_handler(func=lambda m: m.text in list(zodiacal.keys()))
+@bot.message_handler(func=lambda m: m.text in list(zodiacal.keys()) or m.text.find('Ваш зодиакальный знак:') == 0)
 def forecast_zodiacal(message):
     """
     Функция, продолжающая обработку команды /forecast
@@ -200,7 +200,7 @@ def forecast_zodiacal(message):
         bot.reply_to(message, 'Произошла ошибка! Попробуйте еще раз!')
 
 
-@bot.message_handler(func=lambda m: m.text in list(chinese.keys()))
+@bot.message_handler(func=lambda m: m.text in list(chinese.keys()) or m.text.find('Ваш китайский знак:') == 0)
 def forecast_chinese(message):
     """
     Функция, продолжающая обработку команды /forecast

@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+
+  nginx:
+    image: nginx:1.19.0-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx_logs:/var/log/nginx
+      - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - /etc/letsencrypt/live/trppbot.gmrybkin.com/fullchain.pem:/etc/ssl/bundle5.pem
+      - /etc/letsencrypt/live/trppbot.gmrybkin.com/privkey.pem:/etc/ssl/www.trppbot.gmrybkin.com.pem
+    networks:
+      - proxy
+      - trppbot_trpp
+
+networks:
+  proxy:
+  trppbot_trpp:
+    external: true
