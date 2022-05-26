@@ -118,12 +118,12 @@ def update_chinese_forecast():
 
 def update_forecasts():
     """
-    Метод для обновления всех гороскопов, если прошло более 20 часов с последнего обновления
+    Метод для обновления всех гороскопов, если прошел 1 день или более с последнего обновления
     :return:
     """
     current_time = datetime.utcnow()
     last_update_time = get_last_update_time()
-    if not last_update_time or (current_time - last_update_time).seconds // 3600 >= 20:
+    if not last_update_time or (current_time - last_update_time).days >= 1:
         update_zodiacal_forecast()
         update_chinese_forecast()
         set_last_update_time()
